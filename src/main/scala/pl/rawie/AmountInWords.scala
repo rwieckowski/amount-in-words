@@ -51,7 +51,6 @@ class AmountInWords(n: Int) {
       @tailrec
       def words0(n: Int, xs: List[(Int, String)], as: List[String]): List[String] = xs match {
         case Nil => as
-        case _ if n == 0 => as
         case (m, s) :: ys if n >= m => words0(n - m, ys, s :: as)
         case _ :: ys => words0(n, ys, as)
       }
