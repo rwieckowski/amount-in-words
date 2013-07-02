@@ -1,74 +1,37 @@
 package pl.rawie
 
-import scala.annotation.tailrec
-
 class AmountInWords(n: Int) {
   def inWords: String = {
-    val values = List(
-      (900, "dziewięćset"),
-      (800, "osiemset"),
-      (700, "siedemset"),
-      (600, "sześćset"),
-      (500, "pięćset"),
-      (400, "czterysta"),
-      (300, "trzysta"),
-      (200, "dwieście"),
-      (100, "sto"),
-      (90, "dziewięćdziesiąt"),
-      (80, "osiemdziesiąt"),
-      (70, "siedemdziesiąt"),
-      (60, "sześćdziesiąt"),
-      (50, "pięćdziesiąt"),
-      (40, "czterdzieści"),
-      (30, "trzydzieści"),
-      (20, "dwadzieścia"),
-      (19, "dziewiętnaście"),
-      (18, "osiemnaście"),
-      (17, "siedemnaście"),
-      (16, "szesnaście"),
-      (15, "piętnaście"),
-      (14, "czternaście"),
-      (13, "trzynaście"),
-      (12, "dwanaście"),
-      (11, "jedenaście"),
-      (10, "dziesięć"),
-      (9, "dziewięć"),
-      (8, "osiem"),
-      (7, "siedem"),
-      (6, "sześć"),
-      (5, "pięć"),
-      (4, "cztery"),
-      (3, "trzy"),
-      (2, "dwa"),
-      (1, "jeden")
-    )
-    val numerals = List(
-      (1000000, Array("milion", "miliony", "milionów")),
-      (1000, Array("tysiąc", "tysiące", "tysięcy"))
+    val hundreds = Map(1 -> "sto", 2 -> "dwieście", 3 -> "trzysta", 4 -> "czterysta", 5 -> "pięćset", 6 -> "sześćset",
+      7 -> "siedemset", 8 -> "osiemset", 9 -> "dziewięćset")
+    val tens = Map(2 -> "dwadzieścia", 3 -> "trzydzieści", 4 -> "czterdzieści", 5 -> "pięćdziesiąt",
+      6 -> "sześćdziesiąt", 7 -> "siedemdziesiąt", 8 -> "osiemdziesiąt", 9 -> "dziewięćdziesiąt")
+    val ones = Map(1 -> "jeden", 2 -> "dwa", 3 -> "trzy", 4 -> "cztery", 5 -> "pięć", 6 -> "sześć", 7 -> "siedem",
+      8 -> "osiem", 9 -> "dziewięć", 10 -> "dziesięć", 11 -> "jedenaście", 12 -> "dwanaście", 13 -> "trzynaście",
+      14 -> "czternaście", 15 -> "piętnaście", 16 -> "szesnaście", 17 -> "siedemnaście", 18 -> "osiemnaście",
+      19 -> "dziewiętnaście")
+    val numerals: List[(Int, Map[Symbol, String])] = List(
+      (1000000, Map('one -> "milion", 'two_to_four -> "miliony", 'five_to_twenty -> "milionów")),
+      (1000, Map('one -> "tysiąc", 'two_to_four -> "tysiące", 'five_to_twenty -> "tysięcy")),
+      (1, Map.empty)
     )
 
-    def numeral(n: Int, numerals: Array[String]): Option[String] = n match {
-      case 0 => None
-      case 1 => Some(numerals(0))
-      case m if m % 10 >= 2 && m % 10 <= 4 && m / 10 != 1 => Some(numerals(1))
-      case _ => Some(numerals(2))
+    def numeral(n: Int, numerals: Map[Symbol, String]): Option[String] = n match {
+      case 0 => numerals.get('zero)
+      case 1 => numerals.get('one)
+      case m if m % 10 >= 2 && m % 10 <= 4 && m / 10 != 1 => numerals.get('two_to_four)
+      case _ => numerals.get('five_to_twenty)
     }
 
-    def words(n: Int): List[String] = {
-      var i = n
-      for ((j, s) <- values if i >= j) yield {i -= j; s}
-    }
-
-    var i = n
-    val ws = {
-      for ((j, ns) <- numerals if i >= j) yield {
-        val k = i / j
-        i %= j
-        words(k) ++ numeral(k, ns)
+    val words = {
+      for ((i, ns) <- numerals) yield {
+        val k = n / i % 1000
+        val (h, t, o) = (k / 100, k / 10 % 10, if (k % 100 >= 20) k % 10 else k % 20)
+        Nil ++ hundreds.get(h) ++ tens.get(t) ++ ones.get(o) ++ numeral(k, ns)
       }
-    }.flatten ++ words(i)
+    }.flatten
 
-    if (ws.isEmpty) "zero" else ws mkString " "
+    if (words.isEmpty) "zero" else words mkString " "
   }
 }
 
