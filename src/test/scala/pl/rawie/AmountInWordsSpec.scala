@@ -4,8 +4,10 @@ import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
 
 class AmountInWordsSpec extends FlatSpec with ShouldMatchers {
+  import AmountInWords._
+
   def amountInWords(n: Int, expected: String) {
-    AmountInWords(n) should equal(expected)
+    (n inWords) should equal(expected)
   }
 
   "AmountInWords" should "return amount in words" in {

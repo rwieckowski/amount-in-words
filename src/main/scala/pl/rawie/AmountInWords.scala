@@ -1,8 +1,10 @@
 package pl.rawie
 
-object AmountInWords {
-  def apply(n: Int): String = {
-    val words = List(
+import scala.annotation.tailrec
+
+class AmountInWords(n: Int) {
+  def inWords: String = {
+    val values = List(
       (900, "dziewięćset"),
       (800, "osiemset"),
       (700, "siedemset"),
@@ -45,32 +47,38 @@ object AmountInWords {
       (1000, Array("tysiąc", "tysiące", "tysięcy"))
     )
 
-    def toWords(n: Int): List[String] = {
-      def toWords0(n: Int, xs: List[(Int, String)], as: List[String]): List[String] = xs match {
+    def words(n: Int): List[String] = {
+      @tailrec
+      def words0(n: Int, xs: List[(Int, String)], as: List[String]): List[String] = xs match {
         case Nil => as
         case _ if n == 0 => as
-        case (m, s) :: ys if n >= m => toWords0(n - m, ys, s :: as)
-        case _ :: ys => toWords0(n, ys, as)
+        case (m, s) :: ys if n >= m => words0(n - m, ys, s :: as)
+        case _ :: ys => words0(n, ys, as)
       }
-      toWords0(n, words, Nil)
+      words0(n, values, Nil)
     }
 
     def numeral(n: Int, numerals: Array[String]): Option[String] = n match {
       case 0 => None
       case 1 => Some(numerals(0))
-      case n if n >= 12 && n <= 14 => Some(numerals(2))
-      case n if n % 10 >= 2 && n % 10 <= 4 => Some(numerals(1))
+      case m if m >= 12 && m <= 14 => Some(numerals(2))
+      case m if m % 10 >= 2 && m % 10 <= 4 => Some(numerals(1))
       case _ => Some(numerals(2))
     }
 
+    @tailrec
     def inWords0(n: Int, xs: List[(Int, Array[String])], as: List[String]): List[String] = xs match {
-      case Nil => toWords(n) ++ as
-      case (m, numerals) :: ys if n >= m =>
-        inWords0(n % m, ys, Nil ++ numeral(n / m, numerals) ++ toWords(n / m) ++ as)
+      case Nil => (words(n) ++ as).reverse
+      case (m, ns) :: ys if n >= m =>
+        inWords0(n % m, ys, Nil ++ numeral(n / m, ns) ++ words(n / m) ++ as)
       case _ :: ys => inWords0(n, ys, as)
     }
 
-    val w = inWords0(n, numerals, Nil)
-    if (w.isEmpty) "zero" else w.reverse.mkString(" ")
+    val ws = inWords0(n, numerals, Nil)
+    if (ws.isEmpty) "zero" else ws mkString " "
   }
+}
+
+object AmountInWords {
+  implicit def intToAmountInWords(n: Int) = new AmountInWords(n)
 }
