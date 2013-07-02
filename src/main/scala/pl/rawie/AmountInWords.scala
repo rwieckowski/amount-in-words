@@ -47,33 +47,27 @@ class AmountInWords(n: Int) {
       (1000, Array("tysiąc", "tysiące", "tysięcy"))
     )
 
-    def words(n: Int): List[String] = {
-      @tailrec
-      def words0(n: Int, xs: List[(Int, String)], as: List[String]): List[String] = xs match {
-        case Nil => as
-        case (m, s) :: ys if n >= m => words0(n - m, ys, s :: as)
-        case _ :: ys => words0(n, ys, as)
-      }
-      words0(n, values, Nil)
-    }
-
     def numeral(n: Int, numerals: Array[String]): Option[String] = n match {
       case 0 => None
       case 1 => Some(numerals(0))
-      case m if m >= 12 && m <= 14 => Some(numerals(2))
-      case m if m % 10 >= 2 && m % 10 <= 4 => Some(numerals(1))
+      case m if m % 10 >= 2 && m % 10 <= 4 && m / 10 != 1 => Some(numerals(1))
       case _ => Some(numerals(2))
     }
 
-    @tailrec
-    def inWords0(n: Int, xs: List[(Int, Array[String])], as: List[String]): List[String] = xs match {
-      case Nil => (words(n) ++ as).reverse
-      case (m, ns) :: ys if n >= m =>
-        inWords0(n % m, ys, Nil ++ numeral(n / m, ns) ++ words(n / m) ++ as)
-      case _ :: ys => inWords0(n, ys, as)
+    def words(n: Int): List[String] = {
+      var i = n
+      for ((j, s) <- values if i >= j) yield {i -= j; s}
     }
 
-    val ws = inWords0(n, numerals, Nil)
+    var i = n
+    val ws = {
+      for ((j, ns) <- numerals if i >= j) yield {
+        val k = i / j
+        i %= j
+        words(k) ++ numeral(k, ns)
+      }
+    }.flatten ++ words(i)
+
     if (ws.isEmpty) "zero" else ws mkString " "
   }
 }
