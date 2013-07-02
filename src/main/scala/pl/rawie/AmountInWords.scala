@@ -13,6 +13,7 @@ class AmountInWords(n: Int) {
     19 -> "dziewiętnaście")
   private val (one, two_to_four, other) = (1 to 1, 2 to 4, 5 to 19)
   private val numerals = List[(Int, Map[Range, String])](
+    (1000000000, Map(one -> "miliard", two_to_four -> "miliardy", other -> "miliardów")),
     (1000000, Map(one -> "milion", two_to_four -> "miliony", other -> "milionów")),
     (1000, Map(one -> "tysiąc", two_to_four -> "tysiące", other -> "tysięcy")),
     (1, Map.empty)

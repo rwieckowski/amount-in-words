@@ -71,5 +71,7 @@ class AmountInWordsSpec extends FlatSpec with ShouldMatchers {
     amountInWords(1000000, "jeden milion")
 
     amountInWords(1234567, "jeden milion dwieście trzydzieści cztery tysiące pięćset sześćdziesiąt siedem")
+    amountInWords(1234567890, "jeden miliard dwieście trzydzieści cztery miliony pięćset sześćdziesiąt siedem " +
+      "tysięcy osiemset dziewięćdziesiąt")
   }
 }
